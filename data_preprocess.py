@@ -5,11 +5,13 @@ import numpy as np
 from tqdm import tqdm
 
 train_bal_path = "./data/audioset_features/audioset_v1_embeddings/bal_train/" 
+train_unbal_path = "./data/audioset_features/audioset_v1_embeddings/unbal_train/" 
 eval_path = "./data/audioset_features/audioset_v1_embeddings/eval/" 
 context_description = {"video_id":"byte" ,"labels": "int"}
 sequence_description = {"audio_embedding": "byte"}
 
 train_bal_outpath = "./data/audioset_features/audioset_music_only/bal_train_" 
+train_unbal_outpath = "./data/audioset_features/audioset_music_only/unbal_train_" 
 eval_outpath = "./data/audioset_features/audioset_music_only/eval_" 
 
 genre_indices = [216, 217, 219, # Pop, Hip Hop, Rock
@@ -26,7 +28,7 @@ mood_indices = [276, 277, 278, # Happy, Funny, Sad
                 282] # Scary
 
 print("Diving in...")
-for in_path, out_path in zip([train_bal_path, eval_path], [train_bal_outpath, eval_outpath,]):
+for in_path, out_path in zip([train_bal_path, eval_path, train_unbal_path], [train_bal_outpath, eval_outpath, train_unbal_outpath]):
     print("\nWorking on: ", in_path)
     genre_samples = []
     genre_samples_labels = []
