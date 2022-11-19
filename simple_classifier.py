@@ -70,7 +70,7 @@ G_Classifier = G_Classifier.to(device)
 optimizer = torch.optim.Adam(G_Classifier.parameters(), lr=1e-3, weight_decay=1e-2)
 criterion = torch.nn.CrossEntropyLoss()
 
-epochs = 10
+epochs = 20
 epoch_printfreq = 2 # Print output frequency
 
 train_losses = []
@@ -131,6 +131,9 @@ for epoch in range(epochs):
               ", mean val loss: ", epoch_mean_val_loss, 
               ", mean val f1 score: ", epoch_mean_val_f1scores)
 
+# Save the model
+torch.save(G_Classifier.state_dict(), "./CPSC532S_FinalProject/checkpoints/genre_classifier.pt")
+
 plt.plot(train_losses, label="Train Loss")
 plt.plot(val_losses, label="Val Loss")
 plt.plot(f1scores, label="Mean Val F1 (0.7 pred threshold)")
@@ -138,5 +141,6 @@ plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.suptitle("Genre Classif. Loss")
 plt.legend()
+plt.savefig("./CPSC532S_FinalProject/training_curves.jpg")
 plt.show()  
 
