@@ -84,6 +84,7 @@ for epoch in range(epochs):
     epoch_val_f1scores = []    
     if epoch % epoch_printfreq == 0:
         print("Starting epoch: ", epoch, "...")
+    # Training
     G_Classifier.train()
     for batch_idx, batch in enumerate(audioset_genre_trainloader):
         x = batch[0]
