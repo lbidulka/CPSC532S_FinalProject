@@ -11,6 +11,12 @@ from sklearn.metrics import f1_score
 from models import mood_classifier
 from dataset import AudioSet
 
+SEED = 1234
+
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+torch.cuda.manual_seed(SEED)
+
 # Dataset
 audioset = AudioSet()
 
