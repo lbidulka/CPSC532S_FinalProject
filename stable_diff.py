@@ -1,7 +1,4 @@
-import requests
 import torch
-from PIL import Image
-from io import BytesIO
 from diffusers import StableDiffusionPipeline
 from prompt_templates import genre_prompts, moods
 
