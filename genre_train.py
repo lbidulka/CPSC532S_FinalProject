@@ -8,8 +8,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score
 
-from models import genre_classifier
-from dataset import AudioSet
+from utils.models import genre_classifier
+from utils.dataset import AudioSet
 
 SEED = 1234
 

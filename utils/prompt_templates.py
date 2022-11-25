@@ -1,5 +1,5 @@
-
 moods = ["Happy", "Funny", "Sad", "Tender", "Exciting", "Angry", "Scary"]
+
 genres = ["Pop", "Hip Hop", "Rock",
             "R&B", "Soul", "Reggae",
             "Country", "Funk", "Folk",
@@ -35,13 +35,3 @@ genre_prompts = ["* pop music artist performing",    # Pop
                  "* ska music", # Ska, 
                  "* traditional music", # Traditional,
                  "* independent music"] # Independent
-
-# genre_prompts = [216, 217, 219, # Pop, Hip Hop, Rock
-#                  226, 227, 228, # R&B, Soul, Reggae
-#                  229, 232, 233, # Country, Funk, Folk
-#                  234, 235, 236, # Middle Eastern, Jazz, Disco
-#                  237, 239, 248, # Classical, Electronic, Latin
-#                  251, 252, 253, # Blues, Chilren's, New-age
-#                  254, 256, 258, # Vocal, Music of Africa, Christian
-#                  260, 263, 264, # Music of Asia, Ska, Traditional
-#                  265] # Independent

@@ -2,9 +2,9 @@ import torch
 import numpy as np
 from diffusers import StableDiffusionPipeline
 
-from models import genre_classifier, mood_classifier
-from dataset import AudioSet, genre_indices, mood_indices
-from prompt_templates import genre_prompts, moods, genres
+from utils.models import genre_classifier, mood_classifier
+from utils.dataset import AudioSet, genre_indices, mood_indices
+from utils.prompt_templates import genre_prompts, moods, genres
 
 SEED = 1234
 np.random.seed(SEED)
@@ -21,7 +21,7 @@ def main():
     # Get extract a sample
     print("Loading dataset...", end=" ")
     audioset = AudioSet(batch_size=1, inference=True)
-    print("done!")
+    print("done!\n")
     batch = next(iter(audioset.inf_testloader))
     feature, genre, mood, vid_id, times = batch
     print("Input video ID:", vid_id)
@@ -39,7 +39,7 @@ def main():
     pred_genre_audioset_idx = genre_indices[pred_genre_idx]
 
     print("GT mood: ", moods[mood_idx], ", Pred mood: ", moods[pred_mood_idx])
-    print("GT genre: ", genres[genre_idx], ", Pred genre: ", genres[pred_genre_idx])
+    print("GT genre: ", genres[genre_idx], ", Pred genre: ", genres[pred_genre_idx], "\n")
     
     # Create genre-based prompt
     SD_input_mood = moods[pred_mood_idx]

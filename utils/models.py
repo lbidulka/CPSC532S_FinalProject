@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from dataset import genre_indices, mood_indices
+from utils.dataset import genre_indices, mood_indices
 
 # Models
 class genre_classifier(torch.nn.Module):
