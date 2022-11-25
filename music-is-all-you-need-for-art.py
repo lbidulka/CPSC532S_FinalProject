@@ -6,10 +6,10 @@ from utils.models import genre_classifier, mood_classifier
 from utils.dataset import AudioSet, genre_indices, mood_indices
 from utils.prompt_templates import genre_prompts, moods, genres
 
-SEED = 1234
-np.random.seed(SEED)
-torch.manual_seed(SEED)
-torch.cuda.manual_seed(SEED)
+# SEED = 1234
+# np.random.seed(SEED)
+# torch.manual_seed(SEED)
+# torch.cuda.manual_seed(SEED)
 
 def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -28,7 +28,7 @@ def main():
     vid_url = ""
     for id in vid_id[0].tolist():
         vid_url += chr(int(id))
-    print("Input video ID: https://www.youtube.com/watch?v={}".format(vid_url))
+    print("Input video ID: https://www.youtube.com/watch?v={}{}".format(vid_url, "&t="+str(int(times[0,0].item()))+"s"))
     print("Time from {}s to {}s\n".format(times[0,0].item(), times[0,1].item()))
 
     mood_idx = torch.argmax(mood)
@@ -50,7 +50,7 @@ def main():
     # Create genre-based prompt
     SD_input_mood = moods[pred_mood_idx]
     SD_prompt = genre_prompts[pred_genre_idx].replace("*", SD_input_mood)   # Get prompt from our list, add in the mood
-    print("Input prompt: ", SD_prompt)
+    print("Input prompt: ", SD_prompt, "\n")
 
     # Generate output img with SD
     pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16, revision="fp16")
