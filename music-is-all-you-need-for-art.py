@@ -24,7 +24,13 @@ def main():
     print("done!\n")
     batch = next(iter(audioset.inf_testloader))
     feature, genre, mood, vid_id, times = batch
-    print("Input video ID:", vid_id)
+
+    vid_url = ""
+    for id in vid_id[0].tolist():
+        vid_url += chr(int(id))
+    print("Input video ID: https://www.youtube.com/watch?v={}".format(vid_url))
+    print("Time from {}s to {}s\n".format(times[0,0].item(), times[0,1].item()))
+
     mood_idx = torch.argmax(mood)
     genre_idx = torch.argmax(genre)
     feature = feature.to(device)
