@@ -98,6 +98,6 @@ plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.suptitle("Genre Classif. Loss")
 plt.legend()
-plt.savefig("./CPSC532S_FinalProject/train_curves/genre_training_curves.jpg")
+plt.savefig("./CPSC532S_FinalProject/outputs/train_curves/genre_training_curves.jpg")
 plt.show()  
 

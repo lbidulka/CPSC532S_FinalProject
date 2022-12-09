@@ -67,7 +67,7 @@ def main():
     SD_images_concept = pipe([extended_SD_prompt] * num_out_imgs).images    # Concept art
     
     # Dump outputs
-    out_dir = "./CPSC532S_FinalProject/outputs/"
+    out_dir = "./CPSC532S_FinalProject/outputs/inference/"
     info_dict = {
         'URL': vid_url,
         'GT_mood': moods[mood_idx],
