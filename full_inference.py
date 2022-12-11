@@ -16,6 +16,20 @@ from utils.dataset import AudioSet, genre_indices, mood_indices, moods, genres
 # torch.cuda.manual_seed(SEED)
 
 def main():
+    # Force a sample of some type for analysis? Leave empy to randomly select
+    FORCED_MOOD = [] 
+    # ["Happy", "Funny", "Sad", "Tender", "Exciting", "Angry", "Scary"]
+    FORCED_GENRE = ["Blues"]
+    #["Pop", "Hip Hop", "Rock",
+    # "R&B", "Soul", "Reggae",
+    # "Country", "Funk", "Folk",
+    # "Middle Eastern", "Jazz", "Disco",
+    # "Classical", "Electronic", "Latin",
+    # "Blues", "Chilren's", "New-age",
+    # "Vocal", "Music of Africa", "Christian",
+    # "Music of Asia", "Ska", "Traditional",
+    # "Independent"]
+
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     # Load classifiers
     checkpoint_path = "./CPSC532S_FinalProject/checkpoints/"
@@ -26,8 +40,18 @@ def main():
     print("Loading dataset...", end=" ")
     audioset = AudioSet(batch_size=1, inference=True)
     print("done!\n")
-    batch = next(iter(audioset.inf_testloader))
-    feature, genre, mood, vid_id, times = batch
+    print("Searching for specified labels...")
+    while 1:
+        batch = next(iter(audioset.inf_testloader))
+        feature, genre, mood, vid_id, times = batch
+        feature = feature.to(device)
+        mood_idxs = torch.nonzero(mood.squeeze()).reshape(-1,).tolist()
+        genre_idxs = torch.nonzero(genre.squeeze()).reshape(-1,).tolist()
+        GT_moods = [moods[idx] for idx in mood_idxs]
+        GT_genres = [genres[idx] for idx in genre_idxs]
+        found_mood = True if ((set(FORCED_MOOD) & set(GT_moods)) or not FORCED_MOOD) else False
+        found_genre = True if ((set(FORCED_GENRE) & set(GT_genres)) or not FORCED_GENRE) else False
+        if found_mood and found_genre: break
 
     vid_url = ""
     for id in vid_id[0].tolist():
@@ -35,13 +59,6 @@ def main():
     vid_url = "https://www.youtube.com/watch?v=" + vid_url + "&t=" + str(int(times[0,0].item())) + "s"
     print("Input video URL: ", vid_url)
     print("Time from {}s to {}s\n".format(times[0,0].item(), times[0,1].item()))
-
-    mood_idxs = torch.nonzero(mood.squeeze()).reshape(-1,).tolist()
-    genre_idxs = torch.nonzero(genre.squeeze()).reshape(-1,).tolist()
-    GT_moods = [moods[idx] for idx in mood_idxs]
-    GT_genres = [genres[idx] for idx in genre_idxs]
-
-    feature = feature.to(device)
 
     # Get mood/genre of feature
     NUM_MOOD_PREDS = 2
@@ -61,44 +78,44 @@ def main():
     print("Mood: ", correct_mood, " (GT: ", GT_moods, ", Pred mood: ", pred_moods, ")")
     print("Genre: ", correct_genre, " (GT: ", GT_genres, ", Pred genre: ", pred_genres, ")\n")
     
-    # # Create genre-based prompt
-    # prompt_mood = pred_moods[0]     # TEMP: just take the top predictions
-    # prompt_genre = pred_genres[0]
-    # SD_prompt = prompt_mood + " " + prompt_genre + " music album cover"
-    # print("Input prompt: ", SD_prompt, "\n")
-    # text_pipe = pipeline('text-generation', model='daspartho/prompt-extend', device=0)
-    # extended_SD_prompt = text_pipe(SD_prompt+',', num_return_sequences=1, max_length=25)[0]["generated_text"]
-    # extended_SD_prompt
-    # print("Extended input prompt: ", extended_SD_prompt, "\n")
+    # Create genre-based prompt
+    prompt_mood = pred_moods[0]     # TEMP: just take the top predictions
+    prompt_genre = pred_genres[0]
+    SD_prompt = prompt_mood + " " + prompt_genre + " music album cover"
+    print("Input prompt: ", SD_prompt, "\n")
+    text_pipe = pipeline('text-generation', model='daspartho/prompt-extend', device=0)
+    extended_SD_prompt = text_pipe(SD_prompt+',', num_return_sequences=1, max_length=25)[0]["generated_text"]
+    extended_SD_prompt
+    print("Extended input prompt: ", extended_SD_prompt, "\n")
 
-    # # Generate output imgs with SD
-    # num_out_imgs = 2
-    # SD_model_id = "stabilityai/stable-diffusion-2"
-    # scheduler = EulerDiscreteScheduler.from_pretrained(SD_model_id, subfolder="scheduler")
-    # pipe = StableDiffusionPipeline.from_pretrained(SD_model_id, scheduler=scheduler, torch_dtype=torch.float16, revision="fp16")
-    # pipe = pipe.to("cuda")
-    # pipe.enable_attention_slicing() # Reduce GPU usage
-    # SD_images_album = pipe([SD_prompt] * num_out_imgs).images             # Album cover
-    # SD_images_concept = pipe([extended_SD_prompt] * num_out_imgs).images    # Concept art
+    # Generate output imgs with SD
+    num_out_imgs = 2
+    SD_model_id = "stabilityai/stable-diffusion-2"
+    scheduler = EulerDiscreteScheduler.from_pretrained(SD_model_id, subfolder="scheduler")
+    pipe = StableDiffusionPipeline.from_pretrained(SD_model_id, scheduler=scheduler, torch_dtype=torch.float16, revision="fp16")
+    pipe = pipe.to("cuda")
+    pipe.enable_attention_slicing() # Reduce GPU usage
+    SD_images_album = pipe([SD_prompt] * num_out_imgs).images             # Album cover
+    SD_images_concept = pipe([extended_SD_prompt] * num_out_imgs).images    # Concept art
     
-    # # Dump outputs
-    # out_dir = "./CPSC532S_FinalProject/outputs/inference/"
-    # info_dict = {
-    #     'URL': vid_url,
-    #     'GT_moods': GT_moods,
-    #     'GT_genres': GT_genres,
-    #     'pred_moods': pred_moods, 
-    #     'pred_genres': pred_genres,
-    #     'album_prompt': SD_prompt,
-    #     'concept_prompt': extended_SD_prompt,
-    # }
-    # info_json = json.dumps(info_dict)
-    # with open(out_dir + "info.json", "w") as outfile:
-    #     outfile.write(info_json)
-    # for i, img in enumerate(SD_images_album):
-    #     img.save(out_dir + "album_output_" + str(i) + ".png")
-    # for i, img in enumerate(SD_images_concept):
-    #     img.save(out_dir + "concept_output_" + str(i) + ".png")
+    # Dump outputs
+    out_dir = "./CPSC532S_FinalProject/outputs/inference/"
+    info_dict = {
+        'URL': vid_url,
+        'GT_moods': GT_moods,
+        'GT_genres': GT_genres,
+        'pred_moods': pred_moods, 
+        'pred_genres': pred_genres,
+        'album_prompt': SD_prompt,
+        'concept_prompt': extended_SD_prompt,
+    }
+    info_json = json.dumps(info_dict)
+    with open(out_dir + "info.json", "w") as outfile:
+        outfile.write(info_json)
+    for i, img in enumerate(SD_images_album):
+        img.save(out_dir + "album_output_" + str(i) + ".png")
+    for i, img in enumerate(SD_images_concept):
+        img.save(out_dir + "concept_output_" + str(i) + ".png")
 
 if __name__ == "__main__":
     main()
