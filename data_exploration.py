@@ -31,18 +31,26 @@ def main():
     genre_unbal_count = torch.zeros((len(genres)))
     genre_bal_count = torch.zeros((len(genres)))
     genre_test_count = torch.zeros((len(genres)))
+    genre_unbal_multilabel_count = 0
+    genre_bal_multilabel_count = 0
+    genre_test_multilabel_count = 0
 
     mood_count_pos = torch.arange(0, len(moods))
     mood_unbal_count = torch.zeros((len(moods)))
     mood_bal_count = torch.zeros((len(moods)))
     mood_test_count = torch.zeros((len(moods)))
+    mood_unbal_multilabel_count = 0
+    mood_bal_multilabel_count = 0
+    mood_test_multilabel_count = 0
 
     # GENRES -------------------------------------------------------------------------
     print("Counting genre unbalanced train...")
     for batch_idx, batch in enumerate(tqdm(audioset.genre_unbal_trainloader)):
-            y = batch[1]
-            sum_y = torch.sum(y, dim=0)
-            genre_unbal_count += sum_y
+        y = batch[1]
+        sum_y = torch.sum(y, dim=0)
+        genre_unbal_count += sum_y
+        genre_unbal_multilabel_count += torch.count_nonzero(y.sum(axis=1) - 1) 
+    print("Num multilabel: ", genre_unbal_multilabel_count)
 
     plt.bar(genre_count_pos, genre_unbal_count)
     plt.xticks(range(len(genres)), genres, size="small")
@@ -57,9 +65,11 @@ def main():
 
     print("Counting genre balanced train...")
     for batch_idx, batch in enumerate(tqdm(audioset.genre_trainloader)):
-            y = batch[1]
-            sum_y = torch.sum(y, dim=0)
-            genre_bal_count += sum_y
+        y = batch[1]
+        sum_y = torch.sum(y, dim=0)
+        genre_bal_count += sum_y
+        genre_bal_multilabel_count += torch.count_nonzero(y.sum(axis=1) - 1) 
+    print("Num multilabel: ", genre_bal_multilabel_count)
 
     plt.bar(genre_count_pos, genre_bal_count)
     plt.xticks(range(len(genres)), genres, size="small")
@@ -74,9 +84,11 @@ def main():
 
     print("Counting genre test...")
     for batch_idx, batch in enumerate(tqdm(audioset.genre_testloader)):
-            y = batch[1]
-            sum_y = torch.sum(y, dim=0)
-            genre_test_count += sum_y
+        y = batch[1]
+        sum_y = torch.sum(y, dim=0)
+        genre_test_count += sum_y
+        genre_test_multilabel_count += torch.count_nonzero(y.sum(axis=1) - 1) 
+    print("Num multilabel: ", genre_test_multilabel_count)
 
     plt.bar(genre_count_pos, genre_test_count)
     plt.xticks(range(len(genres)), genres, size="small")
@@ -89,12 +101,27 @@ def main():
     plt.clf()
     np.save(out_dir + "genre_test_count.npy", genre_test_count.numpy())
 
+    mood_total_count = genre_test_count + genre_bal_count + genre_unbal_count
+    print("Num Genre Samples: ", mood_total_count.sum().item())
+    plt.bar(genre_count_pos, mood_total_count)
+    plt.xticks(range(len(genres)), genres, size="small")
+    plt.tick_params(axis="x", rotation=90)
+    plt.title("Total Genre Sample Counts")
+    plt.xlabel("Genres")
+    plt.ylabel("Num Samples")
+    plt.tight_layout()
+    plt.savefig(out_dir + "total_genre_hist.jpg")
+    plt.clf()
+    
+
     # MOOD -----------------------------------------------------------------------
     print("Counting mood unbalanced train...")
     for batch_idx, batch in enumerate(tqdm(audioset.mood_unbal_trainloader)):
-            y = batch[1]
-            sum_y = torch.sum(y, dim=0)
-            mood_unbal_count += sum_y
+        y = batch[1]
+        sum_y = torch.sum(y, dim=0)
+        mood_unbal_count += sum_y
+        mood_unbal_multilabel_count += torch.count_nonzero(y.sum(axis=1) - 1) 
+    print("Num multilabel: ", mood_unbal_multilabel_count)
 
     plt.bar(mood_count_pos, mood_unbal_count)
     plt.xticks(range(len(moods)), moods, size="small")
@@ -109,9 +136,11 @@ def main():
 
     print("Counting mood balanced train...")
     for batch_idx, batch in enumerate(tqdm(audioset.mood_trainloader)):
-            y = batch[1]
-            sum_y = torch.sum(y, dim=0)
-            mood_bal_count += sum_y
+        y = batch[1]
+        sum_y = torch.sum(y, dim=0)
+        mood_bal_count += sum_y
+        mood_bal_multilabel_count += torch.count_nonzero(y.sum(axis=1) - 1) 
+    print("Num multilabel: ", mood_bal_multilabel_count)
 
     plt.bar(mood_count_pos, mood_bal_count)
     plt.xticks(range(len(moods)), moods, size="small")
@@ -126,9 +155,11 @@ def main():
 
     print("Counting mood test...")
     for batch_idx, batch in enumerate(tqdm(audioset.mood_testloader)):
-            y = batch[1]
-            sum_y = torch.sum(y, dim=0)
-            mood_test_count += sum_y
+        y = batch[1]
+        sum_y = torch.sum(y, dim=0)
+        mood_test_count += sum_y
+        mood_test_multilabel_count += torch.count_nonzero(y.sum(axis=1) - 1) 
+    print("Num multilabel: ", mood_test_multilabel_count)
 
     plt.bar(mood_count_pos, mood_test_count)
     plt.xticks(range(len(moods)), moods, size="small")
@@ -140,6 +171,18 @@ def main():
     plt.savefig(out_dir + "mood_test_hist.jpg")
     plt.clf()
     np.save(out_dir + "mood_test_count.npy", mood_test_count.numpy())
+
+    mood_total_count = mood_test_count + mood_bal_count + mood_unbal_count
+    print("Num Mood Samples: ", mood_total_count.sum().item())
+    plt.bar(mood_count_pos, mood_total_count)
+    plt.xticks(range(len(moods)), moods, size="small")
+    plt.tick_params(axis="x", rotation=90)
+    plt.title("Total Mood Sample Counts")
+    plt.xlabel("Moods")
+    plt.ylabel("Num Samples")
+    plt.tight_layout()
+    plt.savefig(out_dir + "total_mood_hist.jpg")
+    plt.clf()
 
 if __name__ == "__main__":
     main()

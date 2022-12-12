@@ -7,8 +7,7 @@ lt.monkey_patch()
 import json
 
 from utils.models import genre_classifier, mood_classifier
-from utils.dataset import AudioSet, genre_indices, mood_indices, moods, genres
-# from utils.label_info import moods, genres
+from utils.dataset import AudioSet, moods, genres
 
 # SEED = 1234
 # np.random.seed(SEED)
@@ -17,15 +16,15 @@ from utils.dataset import AudioSet, genre_indices, mood_indices, moods, genres
 
 def main():
     # Force a sample of some type for analysis? Leave empy to randomly select
-    FORCED_MOOD = [] 
+    FORCED_MOOD = ["Funny", "Sad", "Angry", "Scary"] 
     # ["Happy", "Funny", "Sad", "Tender", "Exciting", "Angry", "Scary"]
-    FORCED_GENRE = ["Blues"]
+    FORCED_GENRE = ["Country"]
     #["Pop", "Hip Hop", "Rock",
     # "R&B", "Soul", "Reggae",
     # "Country", "Funk", "Folk",
     # "Middle Eastern", "Jazz", "Disco",
     # "Classical", "Electronic", "Latin",
-    # "Blues", "Chilren's", "New-age",
+    # "Blues", "Children's", "New-age",
     # "Vocal", "Music of Africa", "Christian",
     # "Music of Asia", "Ska", "Traditional",
     # "Independent"]
@@ -36,13 +35,13 @@ def main():
     mood_model = torch.load(checkpoint_path + "mood_classifier.pth")
     genre_model = torch.load(checkpoint_path + "genre_classifier.pth")
 
-    # Get extract a sample
+    # Load a sample
     print("Loading dataset...", end=" ")
     audioset = AudioSet(batch_size=1, inference=True)
     print("done!\n")
     print("Searching for specified labels...")
     while 1:
-        batch = next(iter(audioset.inf_testloader))
+        batch = next(iter(audioset.inf_unbal_trainloader))
         feature, genre, mood, vid_id, times = batch
         feature = feature.to(device)
         mood_idxs = torch.nonzero(mood.squeeze()).reshape(-1,).tolist()
@@ -79,8 +78,10 @@ def main():
     print("Genre: ", correct_genre, " (GT: ", GT_genres, ", Pred genre: ", pred_genres, ")\n")
     
     # Create genre-based prompt
-    prompt_mood = pred_moods[0]     # TEMP: just take the top predictions
-    prompt_genre = pred_genres[0]
+    intersect_mood = [item for item in pred_moods if item in GT_moods]
+    intersect_genre = [item for item in pred_genres if item in GT_genres]
+    prompt_mood = intersect_mood[0] if bool(intersect_mood) else pred_moods[0] 
+    prompt_genre =  intersect_genre[0] if bool(intersect_genre) else pred_genres[0]
     SD_prompt = prompt_mood + " " + prompt_genre + " music album cover"
     print("Input prompt: ", SD_prompt, "\n")
     text_pipe = pipeline('text-generation', model='daspartho/prompt-extend', device=0)

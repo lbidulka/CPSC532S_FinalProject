@@ -24,7 +24,7 @@ genres = ["Pop", "Hip Hop", "Rock",
             "Country", "Funk", "Folk",
             "Middle Eastern", "Jazz", "Disco",
             "Classical", "Electronic", "Latin",
-            "Blues", "Chilren's", "New-age",
+            "Blues", "Children's", "New-age",
             "Vocal", "Music of Africa", "Christian",
             "Music of Asia", "Ska", "Traditional",
             "Independent"]
